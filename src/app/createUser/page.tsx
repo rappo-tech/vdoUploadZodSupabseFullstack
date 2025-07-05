@@ -26,7 +26,7 @@ export default function UploadPage() {
           "Content-Type": "multipart/form-data",
         },
       });
-if(res.status===202){
+if(res.status===201){
       setStatus("Upload successful 🎉");
       setUserName("");
       setFile(null);

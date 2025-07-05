@@ -1,7 +1,6 @@
 // utils/cloudinaryUtils.ts
 import cloudinary from "../lib/cloudinaryConfig";
-import fs from "fs/promises";
-import path from "path";
+
 
 // ✅ Type to replace `any`
 type FileMeta = {
@@ -24,38 +23,45 @@ export const validateFile = (file: FileMeta) => {
 
   return { isValid: true };
 };
-
-// ✅ Generate a unique file name
+//  gnerateFileName
 export const generateFileName = (originalName: string): string => {
   const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 8);
-  const ext = path.extname(originalName);
-  return `${timestamp}_${random}${ext}`;
+  const randomString = Math.random().toString(36).substring(2, 15);
+  const extension = originalName.split('.').pop() || 'jpg';
+  return `${timestamp}_${randomString}.${extension}`;
 };
-
-// ✅ Convert file to base64 (used in traditional Node.js file handling, optional in App Router)
-export const convertToBase64 = async (filepath: string): Promise<string> => {
-  const data = await fs.readFile(filepath);
-  return `data:image/jpeg;base64,${data.toString("base64")}`;
-};
-
-// ✅ Upload to Cloudinary
+//upload from clodinary
 export const uploadToCloudinary = async (
-  base64: string,
+  fileBuffer: Buffer,
   fileName: string
 ): Promise<{ publicId: string; url: string }> => {
-  const result = await cloudinary.uploader.upload(base64, {
-    public_id: fileName,
-    folder: "your-folder-name", // you can change this to any folder in your Cloudinary account
-    resource_type: "auto",
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(
+      {
+        public_id: fileName,
+        folder: "your-folder-name", // you can change this to any folder in your Cloudinary account
+        resource_type: "auto",
+        quality: "auto",
+        fetch_format: "auto",
+        // Optional: Add transformation optimizations
+        flags: "progressive",
+      },
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary upload error:', error);
+          reject(error);
+        } else if (result) {
+          resolve({
+            publicId: result.public_id,
+            url: result.secure_url,
+          });
+        } else {
+          reject(new Error('Upload failed - no result returned'));
+        }
+      }
+    ).end(fileBuffer);
   });
-
-  return {
-    publicId: result.public_id,
-    url: result.secure_url,
-  };
 };
-
 // ✅ Delete from Cloudinary
 export const deleteFromCloudinary = async (publicId: string): Promise<void> => {
   await cloudinary.uploader.destroy(publicId);
