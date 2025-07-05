@@ -1,6 +1,6 @@
 'use client'
 import{create} from 'zustand'
-export type Role = "USER" | "ADMIN" | "MODERATOR";
+export type Role = 'USER'|'ADMIN'|'MODERATOR'
 export interface User{
 userName:string, 
 age:number,

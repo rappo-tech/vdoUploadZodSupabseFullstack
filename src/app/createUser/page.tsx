@@ -1,96 +1,71 @@
 "use client";
 
 import { useState } from "react";
-import { userSchema,UserInput } from "../../../lib/zodSchemas/userSchema";
 import axios from "axios";
-import { UseUser } from "../../../zustandStore/useUser";
 
-
-export default function CreateUserForm() {
-  const [formData, setFormData] = useState<UserInput>({
-    userName: "",
-    age: 0,
-    role: "USER",
-  });
+export default function UploadPage() {
+  const [userName, setUserName] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState("");
-  const {setUser}=UseUser()
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "age" ? parseInt(value, 10) : value,
-    }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const result = userSchema.safeParse(formData);
-    if (!result.success) {
-      setStatus(result.error.issues[0].message);
+  const handleUpload = async () => {
+    if (!userName || !file) {
+      setStatus("Please provide both username and image");
       return;
     }
 
+    const formData = new FormData();
+    formData.append("userName", userName);
+    formData.append("file", file);
+
     try {
-      const res = await axios.post("/api2/createUser", formData);
-      if (res.status === 201) {
-        setStatus("✅ User created!");
-       setUser({
-    userName:formData.userName, 
-    age:formData.age, 
-    role:formData.role
-       })
-        setFormData({ userName: "", age: 0, role: "USER" });
-      } else {
-        setStatus("❌ Failed to create user");
-      }
+      setStatus("Uploading...");
+
+      const res = await axios.post("/api2/createUser", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+if(res.status===202){
+      setStatus("Upload successful 🎉");
+      setUserName("");
+      setFile(null);
+}
     } catch  {
-      setStatus("❌ Server error");
+      
+      setStatus( "Upload failed");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 p-4 border rounded w-fit">
-      <div>
-        <label>Username: </label>
-        <input
-          type="text"
-          name="userName"
-          value={formData.userName}
-          onChange={handleChange}
-          className="border px-2 py-1"
-        />
-      </div>
-      <div>
-        <label>Age: </label>
-        <input
-          type="number"
-          name="age"
-          value={formData.age}
-          onChange={handleChange}
-          className="border px-2 py-1"
-        />
-      </div>
-      <div>
-        <label>Role: </label>
-        <select
-          name="role"
-          value={formData.role}
-          onChange={handleChange}
-          className="border px-2 py-1"
-        >
-          <option value="USER">User</option>
-          <option value="ADMIN">Admin</option>
-          <option value="MODERATOR">Moderator</option>
-        </select>
-      </div>
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-        Create User
+    <div className="max-w-md mx-auto mt-10 p-6 border rounded-xl shadow-md space-y-4">
+      <h1 className="text-2xl font-bold text-center">Upload Image</h1>
+
+      <input
+        type="text"
+        placeholder="Enter your name"
+        value={userName}
+        onChange={(e) => setUserName(e.target.value)}
+        className="w-full border p-2 rounded"
+      />
+
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={(e) => setFile(e.target.files?.[0] || null)}
+        className="w-full border p-2 rounded"
+      />
+
+      <button
+        onClick={handleUpload}
+        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+      >
+        Upload
       </button>
-      <p className="text-sm text-green-600">{status}</p>
-    </form>
+
+      {status && (
+        <p className="text-center text-sm text-gray-700">{status}</p>
+      )}
+    </div>
   );
 }
