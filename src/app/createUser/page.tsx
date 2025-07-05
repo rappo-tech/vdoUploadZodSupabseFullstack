@@ -51,7 +51,7 @@ if(res.status===201){
 
       <input
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
         onChange={(e) => setFile(e.target.files?.[0] || null)}
         className="w-full border p-2 rounded"
       />

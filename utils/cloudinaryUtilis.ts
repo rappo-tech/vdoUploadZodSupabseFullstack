@@ -10,8 +10,8 @@ type FileMeta = {
 
 // ✅ Validate file (type + size)
 export const validateFile = (file: FileMeta) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-  const maxSize = 10 * 1024 * 1024; // 10MB
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'];
+  const maxSize = 50 * 1024 * 1024; // 50MB
 
   if (!allowedTypes.includes(file.type)) {
     return { isValid: false, error: 'Invalid file type' };

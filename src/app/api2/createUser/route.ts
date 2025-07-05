@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { uploadSchema } from "../../../../zodSchemas/imgSchema";
+import { uploadSchema } from "../../../../zodSchemas/imgNVdoScema";
 import prisma from "../../../../lib/prisma";
 import { generateFileName, uploadToCloudinary } from "../../../../utils/cloudinaryUtilis";
 
